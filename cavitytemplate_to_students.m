@@ -916,12 +916,43 @@ function SGS_forward_sweep(~)
 global two half
 global imax jmax rho rhoinv dx dy rkappa rmu vel2ref
 global artviscx artviscy dt s u
-
+% NOTE: s is "Sorce term" not artifical viscosity
 % Symmetric Gauss-Siedel: Forward Sweep
 
 % !************************************************************** */
-% !************ADD CODING HERE FOR INTRO CFD STUDENTS************ */
+% !************       Should be mostly coded         ************ */
 % !************************************************************** */
+tdx=two*dx;tdy=two*dy;dxsqd=dx^2;dysqd=dy^2;
+for j=2:jmax-1
+    for i=2:imax-1
+        dpdx = (u(i+1,j,1)-u(i-1,j,1))/(tdx);                               % First derivative of pressure w.r.t. x           
+        dudx = (u(i+1,j,2)-u(i-1,j,2))/(tdx);                               % First derivative of x velocity w.r.t. x   
+        dvdx = (u(i+1,j,3)-u(i-1,j,3))/(tdx);                               % First derivative of y velocity w.r.t. x
+        dpdy = (u(i,j+1,1)-u(i,j+1,1))/(tdy);                               % First derivative of pressure w.r.t. y
+        dudy = (u(i,j+1,2)-u(i,j+1,2))/(tdy);                               % First derivative of x velocity w.r.t. y
+        dvdy = (u(i,j+1,3)-u(i,j+1,3))/(tdy);                               % First derivative of y velocity w.r.t. y
+        d2udx2 = (u(i+1,j,2)-(two*u(i,j,2))+u(i-1,j,2))/(dxsqd);            % Second derivative of x velocity w.r.t. x
+        d2vdx2 = (u(i+1,j,3)-(two*u(i,j,3))+u(i-1,j,3))/(dxsqd);            % Second derivative of y velocity w.r.t. x
+        d2udy2 = (u(i,j+1,2)-(two*u(i,j,2))+u(i,j-1,2))/(dysqd);            % Second derivative of x velocity w.r.t. y
+        d2vdy2 = (u(i,j+1,3)-(two*u(i,j,3))+u(i,j-1,3))/(dysqd);            % Second derivative of y velocity w.r.t. y
+        
+        uvel2 = (sqrt((u(i,j,2).^2)+(u(i,j,3).^2))^2);                      % Velocity squared
+        beta2 = max(uvel2,vel2ref*rkappa);                                  % Beta squared parameter for time derivative preconditioning
+        
+% discretization (mass,x-mnt,y-mnt)         
+        u(i,j,1) = u(i,j,1)-(beta2*dt*((rho*dudx)+(rho*dvdy)-artviscx(i,j)...
+            -artviscy-s(i,j,1)));                                           % Continuity (mass)
+        
+        u(i,j,2) = u(i,j,2)-(dt*rhoinv*((rho*u(i,j,2)*dudx)+(rho*u(i,j,3)*dudy)...
+            +dpdx-(rmu*d2udx2)-(rmu*d2udy2)-s(i,j,2)));                     % X - Momentum
+        
+        u(i,j,3) = u(i,j,3)-(dt*rhoinv*((rho*u(i,j,2)*dvdx)+(rho*u(i,j,3)*dvdy)...
+            +dpdy-(rmu*d2vdx2)-(rmu*d2vdy2)-s(i,j,3)));                     % Y - Momentum
+       
+    end
+end
+
+        
 
 
 
@@ -960,8 +991,37 @@ global artviscx artviscy dt s u
 % Symmetric Gauss-Siedel: Backward Sweep
 
 % !************************************************************** */
-% !************ADD CODING HERE FOR INTRO CFD STUDENTS************ */
+% !************       Should be mostly coded         ************ */
 % !************************************************************** */
+tdx=two*dx;tdy=two*dy;dxsqd=dx^2;dysqd=dy^2;
+for i=imax-1:2
+    for j=jmax-1:2
+        dpdx = (u(i+1,j,1)-u(i-1,j,1))/(tdx);                               % First derivative of pressure w.r.t. x           
+        dudx = (u(i+1,j,2)-u(i-1,j,2))/(tdx);                               % First derivative of x velocity w.r.t. x   
+        dvdx = (u(i+1,j,3)-u(i-1,j,3))/(tdx);                               % First derivative of y velocity w.r.t. x
+        dpdy = (u(i,j+1,1)-u(i,j+1,1))/(tdy);                               % First derivative of pressure w.r.t. y
+        dudy = (u(i,j+1,2)-u(i,j+1,2))/(tdy);                               % First derivative of x velocity w.r.t. y
+        dvdy = (u(i,j+1,3)-u(i,j+1,3))/(tdy);                               % First derivative of y velocity w.r.t. y
+        d2udx2 = (u(i+1,j,2)-(two*u(i,j,2))+u(i-1,j,2))/(dxsqd);            % Second derivative of x velocity w.r.t. x
+        d2vdx2 = (u(i+1,j,3)-(two*u(i,j,3))+u(i-1,j,3))/(dxsqd);            % Second derivative of y velocity w.r.t. x
+        d2udy2 = (u(i,j+1,2)-(two*u(i,j,2))+u(i,j-1,2))/(dysqd);            % Second derivative of x velocity w.r.t. y
+        d2vdy2 = (u(i,j+1,3)-(two*u(i,j,3))+u(i,j-1,3))/(dysqd);            % Second derivative of y velocity w.r.t. y
+        
+        uvel2 = (sqrt((u(i,j,2).^2)+(u(i,j,3).^2))^2);                      % Velocity squared
+        beta2 = max(uvel2,vel2ref*rkappa);                                  % Beta squared parameter for time derivative preconditioning
+        
+% discretization (mass,x-mnt,y-mnt)         
+        u(i,j,1) = u(i,j,1)-(beta2*dt*((rho*dudx)+(rho*dvdy)-artviscx(i,j)...
+            -artviscy-s(i,j,1)));                                           % Continuity (mass)
+        
+        u(i,j,2) = u(i,j,2)-(dt*rhoinv*((rho*u(i,j,2)*dudx)+(rho*u(i,j,3)*dudy)...
+            +dpdx-(rmu*d2udx2)-(rmu*d2udy2)-s(i,j,2)));                     % X - Momentum
+        
+        u(i,j,3) = u(i,j,3)-(dt*rhoinv*((rho*u(i,j,2)*dvdx)+(rho*u(i,j,3)*dvdy)...
+            +dpdy-(rmu*d2vdx2)-(rmu*d2vdy2)-s(i,j,3)));                     % Y - Momentum
+       
+    end
+end
 
 
 
