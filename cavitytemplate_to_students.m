@@ -306,6 +306,7 @@ PrsMatrix = u(:,:,1);    %output arrays
 uvelMatrix = u(:,:,2);
 vvelMatrix = u(:,:,3);
 toc  %end timer function
+
 % end
 
 %**************************************************************************/
@@ -874,19 +875,56 @@ function Compute_Artificial_Viscosity(~)
 % % pfunct2      % Temporary variable for 2nd derivative damping [these are
 % not used]
 
-global two four six half
+global two four six half three
 global imax jmax lim rho dx dy Cx Cy Cx2 Cy2 fsmall vel2ref rkappa
 global u
 global artviscx artviscy
-
+frtn=14.0;twntsx=26.0;twntfr=24.0;elevn=11.0;
 
 % !************************************************************** */
-% !************ADD CODING HERE FOR INTRO CFD STUDENTS************ */
+% !************Should be mostly coded                ************ */
 % !************************************************************** */
+for j=2:jmax-1
+    for i=2:imax-1
+        
+        
+        uvel2 = (sqrt((u(i,j,2).^2)+(u(i,j,3).^2))^2);                     % Velocity squared
+        beta2 = max(uvel2,vel2ref*rkappa);                                 % Beta squared parameter for time derivative preconditioning
+        lambda_x = half*(abs(u(i,j,2)+sqrt((u(i,j,2).^2)+(four*beta2))));  % Max absolute value e-value in (x,t)
+        lambda_y = half*(abs(u(i,j,3)+sqrt((u(i,j,3).^2)+(four*beta2))));  % Max absolute value e-value in (y,t)
+        
+        % wall conditions using forward/backward difference for pressure (2nd order 4th derivitive) 
+        if i==2||i==imax-1||j==2||j==jmax-1
+                    if i==2                                                % left wall 
+                        d4pdx4 = (three*u(i,j,3)-frtn*u(i+1,j,3)+twntsx*u(i+2,j,3)...
+                -twntfr*u(i+3,j,3)+elevn*u(i+4,j,3)-two*u(i+5,j,3))/(dx^4);
+                    elseif i==imax-1                                       % right wall
+                        d4pdx4 = (three*u(i,j,3)-frtn*u(i-1,j,3)+twntsx*u(i-2,j,3)...
+                -twntfr*u(i-3,j,3)+elevn*u(i-4,j,3)-two*u(i-5,j,3))/(dx^4);
+                                         % 4th derivative of pressure w.r.t. x
+                    end
+                    if j==2                                                % bottom wall
+                        d4pdy4 = (three*u(i,j,3)-frtn*u(i,j+1,3)+twntsx*u(i,j+2,3)...
+                -twntfr*u(i,j+3,3)+elevn*u(i,j+4,3)-two*u(i,j+5,3))/(dy^4);
+                    elseif j==jmax-1                                       % top wall
+                        d4pdy4 = (three*u(i,j,3)-frtn*u(i,j-1,3)+twntsx*u(i,j-2,3)...
+                -twntfr*u(i,j-3,3)+elevn*u(i,j-4,3)-two*u(i,j-5,3))/(dy^4);
+                    end
+        else                                                               % not a wall
+            d4pdx4 = (u(i+2,j,3)-four*u(i+1,j,3)+six*u(i,j,3)-four*u(i-1,j,3)...
+            +u(i-2,j,3))/(dx^4);                                           % 4th derivative of pressure w.r.t. x
+        
+            d4pdy4 = (u(i,j+2,3)-four*u(i,j+1,3)+six*u(i,j,3)-four*u(i,j-1,3)...
+            +u(i,j-2,3))/(dy^4);                                           % 4th derivative of pressure w.r.t. y
+        end
 
+                                                           
+        artviscx(i,j) = ((-lambda_x*Cx*(dx^3))/beta2)*d4pdx4;
+        artviscy(i,j) = ((-lambda_y*Cy*(dy^3))/beta2)*d4pdy4;
 
-
-
+        
+    end
+end
 end
 %************************************************************************
 function SGS_forward_sweep(~)
@@ -940,13 +978,13 @@ for j=2:jmax-1
         beta2 = max(uvel2,vel2ref*rkappa);                                  % Beta squared parameter for time derivative preconditioning
         
 % discretization (mass,x-mnt,y-mnt)         
-        u(i,j,1) = u(i,j,1)-(beta2*dt*((rho*dudx)+(rho*dvdy)-artviscx(i,j)...
-            -artviscy-s(i,j,1)));                                           % Continuity (mass)
+        u(i,j,1) = u(i,j,1)-(beta2*dt(i,j)*((rho*dudx)+(rho*dvdy)-artviscx(i,j)...
+            -artviscy(i,j)-s(i,j,1)));                                     % Continuity (mass)
         
-        u(i,j,2) = u(i,j,2)-(dt*rhoinv*((rho*u(i,j,2)*dudx)+(rho*u(i,j,3)*dudy)...
+        u(i,j,2) = u(i,j,2)-(dt(i,j)*rhoinv*((rho*u(i,j,2)*dudx)+(rho*u(i,j,3)*dudy)...
             +dpdx-(rmu*d2udx2)-(rmu*d2udy2)-s(i,j,2)));                     % X - Momentum
         
-        u(i,j,3) = u(i,j,3)-(dt*rhoinv*((rho*u(i,j,2)*dvdx)+(rho*u(i,j,3)*dvdy)...
+        u(i,j,3) = u(i,j,3)-(dt(i,j)*rhoinv*((rho*u(i,j,2)*dvdx)+(rho*u(i,j,3)*dvdy)...
             +dpdy-(rmu*d2vdx2)-(rmu*d2vdy2)-s(i,j,3)));                     % Y - Momentum
        
     end
@@ -1011,13 +1049,13 @@ for i=imax-1:2
         beta2 = max(uvel2,vel2ref*rkappa);                                  % Beta squared parameter for time derivative preconditioning
         
 % discretization (mass,x-mnt,y-mnt)         
-        u(i,j,1) = u(i,j,1)-(beta2*dt*((rho*dudx)+(rho*dvdy)-artviscx(i,j)...
-            -artviscy-s(i,j,1)));                                           % Continuity (mass)
+        u(i,j,1) = u(i,j,1)-(beta2*dt(i,j)*((rho*dudx)+(rho*dvdy)-artviscx(i,j)...
+            -artviscy(i,j)-s(i,j,1)));                                      % Continuity (mass)
         
-        u(i,j,2) = u(i,j,2)-(dt*rhoinv*((rho*u(i,j,2)*dudx)+(rho*u(i,j,3)*dudy)...
+        u(i,j,2) = u(i,j,2)-(dt(i,j)*rhoinv*((rho*u(i,j,2)*dudx)+(rho*u(i,j,3)*dudy)...
             +dpdx-(rmu*d2udx2)-(rmu*d2udy2)-s(i,j,2)));                     % X - Momentum
         
-        u(i,j,3) = u(i,j,3)-(dt*rhoinv*((rho*u(i,j,2)*dvdx)+(rho*u(i,j,3)*dvdy)...
+        u(i,j,3) = u(i,j,3)-(dt(i,j)*rhoinv*((rho*u(i,j,2)*dvdx)+(rho*u(i,j,3)*dvdy)...
             +dpdy-(rmu*d2vdx2)-(rmu*d2vdy2)-s(i,j,3)));                     % Y - Momentum
        
     end
