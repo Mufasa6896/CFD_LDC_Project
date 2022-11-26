@@ -307,7 +307,9 @@ uvelMatrix = u(:,:,2);
 vvelMatrix = u(:,:,3);
 toc  %end timer function
 
-% end
+% end  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% REMEBER TO
+% UN-COMMMENT THIS AND THE FIRST LINE TO MAKE BACK INTO A FUNCTION
+% FILE!!!!!!!!
 
 %**************************************************************************/
 %*      					All Other	Functions					      */
@@ -844,9 +846,21 @@ global u dt
 
 
 % !************************************************************** */
-% !************ADD CODING HERE FOR INTRO CFD STUDENTS************ */
+% !************Should be mostly coded                ************ */
 % !************************************************************** */
-
+for j=2:jmax-1
+    for i=2:imax-1
+        uvel2 = (sqrt((u(i,j,2).^2)+(u(i,j,3).^2))^2);                     
+        beta2 = max(uvel2,vel2ref*rkappa);                                 
+        lambda_x = half*(abs(u(i,j,2)+sqrt((u(i,j,2).^2)+(four*beta2))));  
+        lambda_y = half*(abs(u(i,j,3)+sqrt((u(i,j,3).^2)+(four*beta2)))); 
+        lambda_max = max(lambda_x,lambda_y);
+        dtconv = min(dx,dy)/lambda_max;
+        dtvisc = (dx*dy)/(4*(rmu/rho));
+        dt(i,j) = cfl*min(dtconv,dtvisc);
+        dtmin = min(dtmin,dt(i,j));
+    end
+end
 
 
 
