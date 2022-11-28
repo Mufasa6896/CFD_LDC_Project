@@ -1220,8 +1220,29 @@ if imms==1
 % !************ADD CODING HERE FOR INTRO CFD STUDENTS************ */
 % !************************************************************** */
 
+% re making ummsArray incase inital array was changed since begining of
+% code
+% this part of the code is coppied from function initial earlier in the code
+for j=1:jmax
+    for i=1:imax
+        for k=1:neq
+            x = (xmax - xmin)*(i-1)/(imax - 1);
+            y = (ymax - ymin)*(j-1)/(jmax - 1);
+            ummsArray(i,j,k) = umms(x,y,k);
+        end
+    end
+end
+% Test to add this back or just call the global array ummsArray
 
 
+rL1norm = [norm(u(:,:,1)-ummsArray(:,:,1),1);norm(u(:,:,2)-ummsArray(:,:,2),1);...
+    norm(u(:,:,3)-ummsArray(:,:,3),1)];
+
+rL2norm = [norm(u(:,:,1)-ummsArray(:,:,1),2);norm(u(:,:,2)-ummsArray(:,:,2),2);...
+    norm(u(:,:,3)-ummsArray(:,:,3),2)];
+
+rLinfnorm = [norm(u(:,:,1)-ummsArray(:,:,1),Inf);norm(u(:,:,2)-ummsArray(:,:,2),Inf);...
+    norm(u(:,:,3)-ummsArray(:,:,3),Inf)];
 
 end
 
