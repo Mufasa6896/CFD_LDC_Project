@@ -26,8 +26,10 @@ global artviscy;  % Artificial viscosity in y-direction
 global ummsArray; % Array of umms values (funtion umms evaluated at all nodes)
 
 %************ Following are fixed parameters for array sizes *************
-imax = 65;   	% Number of points in the x-direction (use odd numbers only)
-jmax = 65;   	% Number of points in the y-direction (use odd numbers only)
+% imax = 65;   	% Number of points in the x-direction (use odd numbers only)
+% jmax = 65;   	% Number of points in the y-direction (use odd numbers only)
+ imax = 33; 
+ jmax = 33;
 neq = 3;       % Number of equation to be solved ( = 3: mass, x-mtm, y-mtm)
 %********************************************
 %***** All  variables declared here. **
@@ -217,7 +219,8 @@ compute_source_terms();
 
 %========== Main Loop ==========
 isConverged = 0;
-nvec=0;uvec=0;artn=0;
+nvec=0;uvec=0;artn=0;resvec=zeros(1,3);respvec=0;
+convVec=0;
 for n = ninit:nmax
     % Calculate time step
     dtmin = compute_time_step(dtmin);
@@ -268,13 +271,26 @@ for n = ninit:nmax
     rtime = rtime + dtmin;
     
     %plot a random u velcoity to see its fluctuations over the itterations
+    %also plots residuals and conv
 
-    if ( (mod(n,100)==0)||(n==ninit) )
+    if ( (mod(n,50)==0)||(n==ninit) )
     artn=artn+1;
-    nvec(artn)=n;uvec(artn)=u(30,30,2);
+    nvec(artn)=n;
+    resvec(artn,:)=res';
+    convVec(artn)=conv;
+    respvec(artn)=res(1);
+    %uvec(artn)=u(30,30,2);
     figure(1)
-    plot(nvec',uvec','color','b')
+%     plot(nvec',uvec','color','b')
+%     plot(nvec',resvec','color','b')
+%       plot(nvec',convVec','color','b')
+        plot(nvec',respvec','color','b')
+      if n>100
+          ylim([0,2])
+          set(gca, 'YScale', 'log')
+      end
     hold on
+   
     end
 
 
@@ -294,6 +310,7 @@ for n = ninit:nmax
     end
     
 end  % ========== End Main Loop ==========
+hold off % REMOVE WHEN DONE TROUBLESHOOTING
 
 if isConverged == 0
     fprintf('Solution failed to converge in %d iterations!!!', nmax);
@@ -505,8 +522,44 @@ global u
 
 
 % !************************************************************** */
-% !************ADD CODING HERE FOR INTRO CFD STUDENTS************ */
+% !************Should be good                       ************ */
 % !************************************************************** */
+
+% Left/Right walls (corners will reflect top and bottom bnd cond.)
+% Corners not solved in this loop (rely on top/bottom bndcnds to solv)
+for j=2:jmax-1
+    % Right wall
+    i=imax;
+    u(i,j,1)=0;
+    u(i,j,2)=0;
+    u(i,j,3)=2*u(i-1,j,3)-u(i-2,j,3);
+    % Left wall
+    i=1;
+    u(i,j,1)=0;
+    u(i,j,2)=0;
+    u(i,j,3)=2*u(i+1,j,3)-u(i+2,j,3);
+end
+
+
+
+
+
+% Top/Bottom walls (corners will reflect top and bottom bnd cond.)
+for i=1:imax
+    % Top wall
+    j=jmax;
+    u(i,j,1)=uinf;
+    u(i,j,2)=0;
+    u(i,j,3)=2*u(i,j-1,3)-u(i,j-2,3);
+    % Bottom wall
+    j=1;
+    u(i,j,1)=0;
+    u(i,j,2)=0;
+    u(i,j,3)=2*u(i,j+1,3)-u(i,j+2,3);
+end
+
+
+
 
 
 
@@ -1126,6 +1179,35 @@ global u uold artviscx artviscy dt s
 % !************ADD CODING HERE FOR INTRO CFD STUDENTS************ */
 % !************************************************************** */
 
+tdx=two*dx;tdy=two*dy;dxsqd=dx^2;dysqd=dy^2;
+for j=2:jmax-1
+    for i=2:imax-1
+        dpdx = (uold(i+1,j,1)-uold(i-1,j,1))/(tdx);                               % First derivative of pressure w.r.t. x           
+        dudx = (uold(i+1,j,2)-uold(i-1,j,2))/(tdx);                               % First derivative of x velocity w.r.t. x   
+        dvdx = (uold(i+1,j,3)-uold(i-1,j,3))/(tdx);                               % First derivative of y velocity w.r.t. x
+        dpdy = (uold(i,j+1,1)-uold(i,j+1,1))/(tdy);                               % First derivative of pressure w.r.t. y
+        dudy = (uold(i,j+1,2)-uold(i,j+1,2))/(tdy);                               % First derivative of x velocity w.r.t. y
+        dvdy = (uold(i,j+1,3)-uold(i,j+1,3))/(tdy);                               % First derivative of y velocity w.r.t. y
+        d2udx2 = (uold(i+1,j,2)-(two*uold(i,j,2))+uold(i-1,j,2))/(dxsqd);            % Second derivative of x velocity w.r.t. x
+        d2vdx2 = (uold(i+1,j,3)-(two*uold(i,j,3))+uold(i-1,j,3))/(dxsqd);            % Second derivative of y velocity w.r.t. x
+        d2udy2 = (uold(i,j+1,2)-(two*uold(i,j,2))+uold(i,j-1,2))/(dysqd);            % Second derivative of x velocity w.r.t. y
+        d2vdy2 = (uold(i,j+1,3)-(two*uold(i,j,3))+uold(i,j-1,3))/(dysqd);            % Second derivative of y velocity w.r.t. y
+        
+        uvel2 = (sqrt((uold(i,j,2).^2)+(uold(i,j,3).^2))^2);                      % Velocity squared
+        beta2 = max(uvel2,vel2ref*rkappa);                                  % Beta squared parameter for time derivative preconditioning
+        
+% discretization (mass,x-mnt,y-mnt)         
+        u(i,j,1) = uold(i,j,1)-(beta2*dt(i,j)*((rho*dudx)+(rho*dvdy)-artviscx(i,j)...
+            -artviscy(i,j)-s(i,j,1)));                                     % Continuity (mass)
+        
+        u(i,j,2) = uold(i,j,2)-(dt(i,j)*rhoinv*((rho*uold(i,j,2)*dudx)+(rho*uold(i,j,3)*dudy)...
+            +dpdx-(rmu*d2udx2)-(rmu*d2udy2)-s(i,j,2)));                     % X - Momentum
+        
+        u(i,j,3) = uold(i,j,3)-(dt(i,j)*rhoinv*((rho*uold(i,j,2)*dvdx)+(rho*uold(i,j,3)*dvdy)...
+            +dpdy-(rmu*d2vdx2)-(rmu*d2vdy2)-s(i,j,3)));                     % Y - Momentum
+       
+    end
+end
 
 
 
@@ -1201,7 +1283,7 @@ res(1)=max(rms(R(:,:,1)));
 res(2)=max(rms(R(:,:,2)));
 res(3)=max(rms(R(:,:,3)));
 
-if n==1 
+if n==1 || n==100
     resinit=res;
 end
 
@@ -1217,7 +1299,7 @@ end
 
 % Write header for iterative residuals every 200 iterations
 if ( (mod(n,200)==0)||(n==ninit) )
-    fprintf('Iter.   Time (s)      dt (s)        Continuity      x-Momentum      y-Momentum\n');
+    fprintf('Iter.    Time (s)        dt (s)         Continuity      x-Momentum      y-Momentum\n');
 end
 
 end
