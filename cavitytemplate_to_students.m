@@ -28,10 +28,10 @@ global ummsArray; % Array of umms values (funtion umms evaluated at all nodes)
 %************ Following are fixed parameters for array sizes *************
 % Number of points in the x-direction (use odd numbers only)
 % Number of points in the y-direction (use odd numbers only)
-% imax = 65;
-% jmax = 65; 
- imax = 33; 
- jmax = 33;
+imax = 65;
+jmax = 65; 
+%  imax = 33; 
+%  jmax = 33;
 neq = 3;       % Number of equation to be solved ( = 3: mass, x-mtm, y-mtm)
 %********************************************
 %***** All  variables declared here. **
@@ -221,8 +221,14 @@ compute_source_terms();
 
 %========== Main Loop ==========
 isConverged = 0;
-nvec=0;uvec=0;artn=0;resvec=zeros(1,3);respvec=0;
-convVec=0;
+
+%my temp varibles for plotting while program is running
+nvec=zeros(nmax,1);
+% uvec=0;
+artn=0;
+resvec=zeros(nmax,3);
+% respvec=0;
+convVec=zeros(nmax,1);
 for n = ninit:nmax
     % Calculate time step
     dtmin = compute_time_step(dtmin);
@@ -275,13 +281,13 @@ for n = ninit:nmax
     %plot a random u velcoity to see its fluctuations over the itterations
     %also plots residuals and conv
 
-    if ( (mod(n,50)==0)||(n==ninit) )
+    if ( (mod(n,100)==0)||(n==ninit) )
     artn=artn+1;
     nvec(artn)=n;
     resvec(artn,:)=res';
     convVec(artn)=conv;
-    respvec(artn)=res(1);
-    %uvec(artn)=u(30,30,2);
+%     respvec(artn)=res(1);
+%     uvec(artn)=u(30,30,2);
     figure(1)
 %     plot(nvec',uvec','color','b')
     plot(nvec',resvec','color','b')
@@ -291,8 +297,12 @@ for n = ninit:nmax
           ylim([0,1])
           set(gca, 'YScale', 'log')
       end
-    hold on
-   
+    figure(2)
+    plot(nvec',convVec','color','b')
+      if n>1000
+          ylim([0,1])
+          set(gca, 'YScale', 'log')
+      end
     end
 
 
@@ -1280,13 +1290,27 @@ for j=1:jmax
         end
     end
 end
+% R NEEDS TO BE CONVERTED INTO A VECTOR CONTAING ALL NODAL INFO
 
-res(1)=max(rms(R(:,:,1)));
-res(2)=max(rms(R(:,:,2)));
-res(3)=max(rms(R(:,:,3)));
 
-if n==1 || n==100
-    resinit=res;
+% nvm this should do
+res(1)=rms(R(:,:,1),"all");
+res(2)=rms(R(:,:,2),"all");
+res(3)=rms(R(:,:,3),"all");
+
+if n<=10
+    %Resinit rescalling here
+    if res(1)>resinit(1) ||res(2)>resinit(2) || res(3)>resinit(3)
+        if res(1)>resinit(1)
+        resinit(1)=res(1);
+        end
+        if res(2)>resinit(2)
+        resinit(2)=res(2);
+        end
+        if res(3)>resinit(3)
+        resinit(3)=res(3);
+        end
+    end
 end
 
 
@@ -1328,32 +1352,33 @@ global zero imax jmax neq imms xmax xmin ymax ymin u
 if imms==1
 
 % !************************************************************** */
-% !************ADD CODING HERE FOR INTRO CFD STUDENTS************ */
+% !************should be     ehh?                     ************ */
 % !************************************************************** */
 
 % re making ummsArray incase inital array was changed since begining of
 % code
 % this part of the code is coppied from function initial earlier in the code
+ummsArray_2=zeros(imax,jmax,neq);
 for j=1:jmax
     for i=1:imax
         for k=1:neq
             x = (xmax - xmin)*(i-1)/(imax - 1);
             y = (ymax - ymin)*(j-1)/(jmax - 1);
-            ummsArray(i,j,k) = umms(x,y,k);
+            ummsArray_2(i,j,k) = umms(x,y,k);
         end
     end
 end
 % Test to add this back or just call the global array ummsArray
+%% look into why L1norm is giving negative values
+N=imax*jmax;
+rL1norm = [sum(u(:,:,1)-ummsArray_2(:,:,1),'all')/N;sum(u(:,:,2)-ummsArray_2(:,:,2),'all')/N;...
+    sum(u(:,:,3)-ummsArray_2(:,:,3),'all')/N];
 
+rL2norm = [rms(u(:,:,1)-ummsArray_2(:,:,1),"all");rms(u(:,:,2)-ummsArray_2(:,:,2),"all");...
+    rms(u(:,:,3)-ummsArray_2(:,:,3),"all")];
 
-rL1norm = [norm(u(:,:,1)-ummsArray(:,:,1),1);norm(u(:,:,2)-ummsArray(:,:,2),1);...
-    norm(u(:,:,3)-ummsArray(:,:,3),1)];
-
-rL2norm = [norm(u(:,:,1)-ummsArray(:,:,1),2);norm(u(:,:,2)-ummsArray(:,:,2),2);...
-    norm(u(:,:,3)-ummsArray(:,:,3),2)];
-
-rLinfnorm = [norm(u(:,:,1)-ummsArray(:,:,1),Inf);norm(u(:,:,2)-ummsArray(:,:,2),Inf);...
-    norm(u(:,:,3)-ummsArray(:,:,3),Inf)];
+rLinfnorm = [max(u(:,:,1)-ummsArray_2(:,:,1),[],'all');max(u(:,:,2)-ummsArray_2(:,:,2),[],'all');...
+    max(u(:,:,3)-ummsArray_2(:,:,3),[],'all')];
 
 end
 
