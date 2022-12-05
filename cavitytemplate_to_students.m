@@ -278,16 +278,17 @@ for n = ninit:nmax
     % Update the time
     rtime = rtime + dtmin;
     
-    %plot a random u velcoity to see its fluctuations over the itterations
-    %also plots residuals and conv
-
-    if ( (mod(n,100)==0)||(n==ninit) )
+    %% plot conv/res or u vel at random node to get indication of convergance
+    % updates plotting data every 50 itt, updates plot every 1000 itt
+    if ( (mod(n,50)==0)||(n==ninit) )
     artn=artn+1;
     nvec(artn)=n;
     resvec(artn,:)=res';
     convVec(artn)=conv;
 %     respvec(artn)=res(1);
 %     uvec(artn)=u(30,30,2);
+    end
+    if ( (mod(n,5000)==0)||(n==ninit) )
     figure(1)
 %     plot(nvec',uvec','color','b')
     plot(nvec',resvec','color','b')
@@ -303,6 +304,11 @@ for n = ninit:nmax
           ylim([0,1])
           set(gca, 'YScale', 'log')
       end
+
+
+
+
+
     end
 
 
