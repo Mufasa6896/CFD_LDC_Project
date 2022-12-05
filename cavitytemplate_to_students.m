@@ -539,17 +539,19 @@ global u
 
 % Left/Right walls (corners will reflect top and bottom bnd cond.)
 % Corners not solved in this loop (rely on top/bottom bndcnds to solv)
+% remeber u=(p;u;v) NOT (u;v;p)
 for j=2:jmax-1
     % Right wall
     i=imax;
-    u(i,j,1)=0;
+    u(i,j,1)=2*u(i-1,j,1)-u(i-2,j,1);
     u(i,j,2)=0;
-    u(i,j,3)=2*u(i-1,j,3)-u(i-2,j,3);
+    u(i,j,3)=0;
     % Left wall
     i=1;
-    u(i,j,1)=0;
+    u(i,j,1)=2*u(i+1,j,1)-u(i+2,j,1);
     u(i,j,2)=0;
-    u(i,j,3)=2*u(i+1,j,3)-u(i+2,j,3);
+    u(i,j,3)=0;
+    
 end
 
 
@@ -560,14 +562,14 @@ end
 for i=1:imax
     % Top wall
     j=jmax;
-    u(i,j,1)=uinf;
-    u(i,j,2)=0;
-    u(i,j,3)=2*u(i,j-1,3)-u(i,j-2,3);
+    u(i,j,1)=2*u(i,j-1,1)-u(i,j-2,1);
+    u(i,j,2)=uinf;
+    u(i,j,3)=0;
     % Bottom wall
     j=1;
-    u(i,j,1)=0;
+    u(i,j,1)=2*u(i,j+1,1)-u(i,j+2,1);
     u(i,j,2)=0;
-    u(i,j,3)=2*u(i,j+1,3)-u(i,j+2,3);
+    u(i,j,3)=0;
 end
 
 
