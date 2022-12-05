@@ -26,8 +26,10 @@ global artviscy;  % Artificial viscosity in y-direction
 global ummsArray; % Array of umms values (funtion umms evaluated at all nodes)
 
 %************ Following are fixed parameters for array sizes *************
-% imax = 65;   	% Number of points in the x-direction (use odd numbers only)
-% jmax = 65;   	% Number of points in the y-direction (use odd numbers only)
+% Number of points in the x-direction (use odd numbers only)
+% Number of points in the y-direction (use odd numbers only)
+% imax = 65;
+% jmax = 65; 
  imax = 33; 
  jmax = 33;
 neq = 3;       % Number of equation to be solved ( = 3: mass, x-mtm, y-mtm)
@@ -282,11 +284,11 @@ for n = ninit:nmax
     %uvec(artn)=u(30,30,2);
     figure(1)
 %     plot(nvec',uvec','color','b')
-%     plot(nvec',resvec','color','b')
+    plot(nvec',resvec','color','b')
 %       plot(nvec',convVec','color','b')
-        plot(nvec',respvec','color','b')
-      if n>100
-          ylim([0,2])
+%       plot(nvec',respvec','color','b')
+      if n>1000
+          ylim([0,1])
           set(gca, 'YScale', 'log')
       end
     hold on
@@ -1045,9 +1047,9 @@ for j=2:jmax-1
         dpdx = (u(i+1,j,1)-u(i-1,j,1))/(tdx);                               % First derivative of pressure w.r.t. x           
         dudx = (u(i+1,j,2)-u(i-1,j,2))/(tdx);                               % First derivative of x velocity w.r.t. x   
         dvdx = (u(i+1,j,3)-u(i-1,j,3))/(tdx);                               % First derivative of y velocity w.r.t. x
-        dpdy = (u(i,j+1,1)-u(i,j+1,1))/(tdy);                               % First derivative of pressure w.r.t. y
-        dudy = (u(i,j+1,2)-u(i,j+1,2))/(tdy);                               % First derivative of x velocity w.r.t. y
-        dvdy = (u(i,j+1,3)-u(i,j+1,3))/(tdy);                               % First derivative of y velocity w.r.t. y
+        dpdy = (u(i,j+1,1)-u(i,j-1,1))/(tdy);                               % First derivative of pressure w.r.t. y
+        dudy = (u(i,j+1,2)-u(i,j-1,2))/(tdy);                               % First derivative of x velocity w.r.t. y
+        dvdy = (u(i,j+1,3)-u(i,j-1,3))/(tdy);                               % First derivative of y velocity w.r.t. y
         d2udx2 = (u(i+1,j,2)-(two*u(i,j,2))+u(i-1,j,2))/(dxsqd);            % Second derivative of x velocity w.r.t. x
         d2vdx2 = (u(i+1,j,3)-(two*u(i,j,3))+u(i-1,j,3))/(dxsqd);            % Second derivative of y velocity w.r.t. x
         d2udy2 = (u(i,j+1,2)-(two*u(i,j,2))+u(i,j-1,2))/(dysqd);            % Second derivative of x velocity w.r.t. y
@@ -1116,9 +1118,9 @@ for j=jmax-1:2
         dpdx = (u(i+1,j,1)-u(i-1,j,1))/(tdx);                               % First derivative of pressure w.r.t. x           
         dudx = (u(i+1,j,2)-u(i-1,j,2))/(tdx);                               % First derivative of x velocity w.r.t. x   
         dvdx = (u(i+1,j,3)-u(i-1,j,3))/(tdx);                               % First derivative of y velocity w.r.t. x
-        dpdy = (u(i,j+1,1)-u(i,j+1,1))/(tdy);                               % First derivative of pressure w.r.t. y
-        dudy = (u(i,j+1,2)-u(i,j+1,2))/(tdy);                               % First derivative of x velocity w.r.t. y
-        dvdy = (u(i,j+1,3)-u(i,j+1,3))/(tdy);                               % First derivative of y velocity w.r.t. y
+        dpdy = (u(i,j+1,1)-u(i,j-1,1))/(tdy);                               % First derivative of pressure w.r.t. y
+        dudy = (u(i,j+1,2)-u(i,j-1,2))/(tdy);                               % First derivative of x velocity w.r.t. y
+        dvdy = (u(i,j+1,3)-u(i,j-1,3))/(tdy);                               % First derivative of y velocity w.r.t. y
         d2udx2 = (u(i+1,j,2)-(two*u(i,j,2))+u(i-1,j,2))/(dxsqd);            % Second derivative of x velocity w.r.t. x
         d2vdx2 = (u(i+1,j,3)-(two*u(i,j,3))+u(i-1,j,3))/(dxsqd);            % Second derivative of y velocity w.r.t. x
         d2udy2 = (u(i,j+1,2)-(two*u(i,j,2))+u(i,j-1,2))/(dysqd);            % Second derivative of x velocity w.r.t. y
@@ -1185,9 +1187,9 @@ for j=2:jmax-1
         dpdx = (uold(i+1,j,1)-uold(i-1,j,1))/(tdx);                               % First derivative of pressure w.r.t. x           
         dudx = (uold(i+1,j,2)-uold(i-1,j,2))/(tdx);                               % First derivative of x velocity w.r.t. x   
         dvdx = (uold(i+1,j,3)-uold(i-1,j,3))/(tdx);                               % First derivative of y velocity w.r.t. x
-        dpdy = (uold(i,j+1,1)-uold(i,j+1,1))/(tdy);                               % First derivative of pressure w.r.t. y
-        dudy = (uold(i,j+1,2)-uold(i,j+1,2))/(tdy);                               % First derivative of x velocity w.r.t. y
-        dvdy = (uold(i,j+1,3)-uold(i,j+1,3))/(tdy);                               % First derivative of y velocity w.r.t. y
+        dpdy = (uold(i,j+1,1)-uold(i,j-1,1))/(tdy);                               % First derivative of pressure w.r.t. y
+        dudy = (uold(i,j+1,2)-uold(i,j-1,2))/(tdy);                               % First derivative of x velocity w.r.t. y
+        dvdy = (uold(i,j+1,3)-uold(i,j-1,3))/(tdy);                               % First derivative of y velocity w.r.t. y
         d2udx2 = (uold(i+1,j,2)-(two*uold(i,j,2))+uold(i-1,j,2))/(dxsqd);            % Second derivative of x velocity w.r.t. x
         d2vdx2 = (uold(i+1,j,3)-(two*uold(i,j,3))+uold(i-1,j,3))/(dxsqd);            % Second derivative of y velocity w.r.t. x
         d2udy2 = (uold(i,j+1,2)-(two*uold(i,j,2))+uold(i,j-1,2))/(dysqd);            % Second derivative of x velocity w.r.t. y
