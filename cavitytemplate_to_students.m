@@ -288,7 +288,7 @@ for n = ninit:nmax
 %     respvec(artn)=res(1);
 %     uvec(artn)=u(30,30,2);
     end
-    if ( (mod(n,5000)==0)||(n==ninit) )
+    if ( (mod(n,500)==0)||(n==ninit) )
     figure(1)
 %     plot(nvec',uvec','color','b')
     plot(nvec',resvec','color','b')
@@ -363,6 +363,13 @@ toc  %end timer function
 %**************************************************************************/
 
 %**************************************************************************
+
+function res_hist_vecs(~)
+
+
+
+
+end
 %**************************************************************************
 function set_derived_inputs(~)
 global imax jmax
