@@ -282,24 +282,26 @@ for n = ninit:nmax
     
     %% store & plot res/conv history 
     % updates plotting data every 50 itt, updates plot every 500 itt
-    if ( (mod(n,50)==0)||(n==ninit))
-        [artn,nvec,resvec,convVec]=res_hist_vecs(n,conv,res,artn,nvec,resvec,convVec);
+    if ( (mod(n,50)==0)||(n==ninit) )
+        res_hist_vecs(res,conv,n);
     end
     % plots residuals and conv (updates plot every 500 itt)
     if ( (mod(n,500)==0)||(n==ninit) )
     figure(1)
-    plot(nvec(1:artn,:),resvec(1:artn,:))
+    plot(nvec,resvec)
     ylim([0,1])
     set(gca, 'YScale', 'log')
     figure(2)
-    plot(nvec(1:artn,:),convVec(1:artn,:),'color','b')
+    plot(nvec,convVec,'color','b')
     ylim([0,1])
     set(gca, 'YScale', 'log')
+      end
+
+
+
+
+
     end
-
-
-
-
 
 
 
@@ -319,9 +321,8 @@ for n = ninit:nmax
     
 end  % ========== End Main Loop ==========
 hold off % REMOVE WHEN DONE TROUBLESHOOTING
-
 % resize residual and conv histories
-[nvec,resvec,conVec] = Rsize_res_hist(artn,nvec,resvec,convVec);
+Rsize_res_hist(artn,nvec, resvec, convVec);
 
 if isConverged == 0
     fprintf('Solution failed to converge in %d iterations!!!', nmax);
@@ -358,7 +359,8 @@ toc  %end timer function
 
 %**************************************************************************
 % Stores residual and conv histories
-function [artn,nvec,resvec,convVec] = res_hist_vecs(n,conv,res,artn,nvec,resvec,convVec)
+function res_hist_vecs(n,artn,nvec resvec convVeces,conv,n)
+global nvec artn resvec convVec
     artn=artn+1;
     nvec(artn)=n;
     resvec(artn,:)=res';
@@ -367,7 +369,7 @@ end
 
 %**************************************************************************
 % Re-sizes residual and conv histories after sim is done
-function [nvec,resvec,conVec] = Rsize_res_hist(artn,nvec,resvec,convVec)
+function Rsize_res_hist(artn,nvec, resvec,convVec)
 resvec=resvec(1:artn,:);
 convVec=convVec(1:artn,:);
 nvec=nvec(1:artn,:);
