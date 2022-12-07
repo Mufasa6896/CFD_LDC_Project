@@ -60,13 +60,13 @@ six    = 6.0;
 
 nmax = 500000;        % Maximum number of iterations
 iterout = 5000;       % Number of time steps between solution output
-imms = 1;             % Manufactured solution flag: = 1 for manuf. sol., = 0 otherwise
+imms = 0;             % Manufactured solution flag: = 1 for manuf. sol., = 0 otherwise
 isgs = 1;             % Symmetric Gauss-Seidel  flag: = 1 for SGS, = 0 for point Jacobi
 irstr = 0;            % Restart flag: = 1 for restart (file 'restart.in', = 0 for initial run
 ipgorder = 0;         % Order of pressure gradient: 0 = 2nd, 1 = 3rd (not needed)
 lim = 1;              % variable to be used as the limiter sensor (= 1 for pressure)
 
-cfl  = 0.5;      % CFL number used to determine time step
+cfl  = 0.9;      % CFL number used to determine time step
 Cx = 0.01;     	% Parameter for 4th order artificial viscosity in x
 Cy = 0.01;      	% Parameter for 4th order artificial viscosity in y
 toler = 1.e-10; 	% Tolerance for iterative residual convergence
@@ -318,10 +318,11 @@ for n = ninit:nmax
     end
     
 end  % ========== End Main Loop ==========
+%%
 hold off % REMOVE WHEN DONE TROUBLESHOOTING
 
 % resize residual and conv histories
-[nvec,resvec,conVec] = Rsize_res_hist(artn,nvec,resvec,convVec);
+[nvec,resvec,convVec] = Rsize_res_hist(artn,nvec,resvec,convVec);
 
 if isConverged == 0
     fprintf('Solution failed to converge in %d iterations!!!', nmax);
@@ -367,7 +368,7 @@ end
 
 %**************************************************************************
 % Re-sizes residual and conv histories after sim is done
-function [nvec,resvec,conVec] = Rsize_res_hist(artn,nvec,resvec,convVec)
+function [nvec,resvec,convVec] = Rsize_res_hist(artn,nvec,resvec,convVec)
 resvec=resvec(1:artn,:);
 convVec=convVec(1:artn,:);
 nvec=nvec(1:artn,:);
