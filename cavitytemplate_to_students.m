@@ -68,7 +68,7 @@ irstr = 0;            % Restart flag: = 1 for restart (file 'restart.in', = 0 fo
 ipgorder = 0;         % Order of pressure gradient: 0 = 2nd, 1 = 3rd (not needed)
 lim = 1;              % variable to be used as the limiter sensor (= 1 for pressure)
 
-cfl  = 0.5;      % CFL number used to determine time step
+cfl  = 0.9;      % CFL number used to determine time step
 Cx = 0.01;     	% Parameter for 4th order artificial viscosity in x
 Cy = 0.01;      	% Parameter for 4th order artificial viscosity in y
 toler = 1.e-10; 	% Tolerance for iterative residual convergence
@@ -233,6 +233,12 @@ compute_source_terms();
 
 %========== Main Loop ==========
 isConverged = 0;
+
+%% For continuing 129x129 case
+load('129x129_LDC_SGS_CFL_09@50000.mat')
+ninit=n;
+nmax=n+(nmax*2);
+
 for n = ninit:nmax
     % Calculate time step
     dtmin = compute_time_step(dtmin);
