@@ -28,12 +28,12 @@ global ummsArray; % Array of umms values (funtion umms evaluated at all nodes)
 %************ Following are fixed parameters for array sizes *************
 % Number of points in the x-direction (use odd numbers only)
 % Number of points in the y-direction (use odd numbers only)
-imax = 129;
-jmax = 129;
+% imax = 129;
+% jmax = 129;
 % imax = 65;
 % jmax = 65; 
-%  imax = 33; 
-%  jmax = 33;
+ imax = 33; 
+ jmax = 33;
 neq = 3;       % Number of equation to be solved ( = 3: mass, x-mtm, y-mtm)
 %********************************************
 %***** All  variables declared here. **
@@ -62,16 +62,19 @@ six    = 6.0;
 
 nmax = 500000;        % Maximum number of iterations
 iterout = 5000;       % Number of time steps between solution output
-imms = 0;             % Manufactured solution flag: = 1 for manuf. sol., = 0 otherwise
+imms = 1;             % Manufactured solution flag: = 1 for manuf. sol., = 0 otherwise
 isgs = 1;             % Symmetric Gauss-Seidel  flag: = 1 for SGS, = 0 for point Jacobi
 irstr = 0;            % Restart flag: = 1 for restart (file 'restart.in', = 0 for initial run
 imp_mat = 0;          % My shit way of continuing/impoting data / restart (restart flag option failed when atempted)
 ipgorder = 0;         % Order of pressure gradient: 0 = 2nd, 1 = 3rd (not needed)
 lim = 1;              % variable to be used as the limiter sensor (= 1 for pressure)
 
-cfl  = 0.9;      % CFL number used to determine time step
-Cx = 0.01;     	% Parameter for 4th order artificial viscosity in x
-Cy = 0.01;      	% Parameter for 4th order artificial viscosity in y
+cfl  = 0.9;         % CFL number used to determine time step
+Cx = 0.01;     	    % Parameter for 4th order artificial viscosity in x
+Cy = 0.01;          % Parameter for 4th order artificial viscosity in y
+% Cx = 0.001;     	    
+% Cy = 0.001;
+
 toler = 1.e-10; 	% Tolerance for iterative residual convergence
 rkappa = 0.1;   	% Time derivative preconditioning constant
 Re = 100.0;      	% Reynolds number = rho*Uinf*L/rmu
@@ -344,7 +347,8 @@ end
 
 
 % Calculate and Write Out Discretization Error Norms (will do this for MMS only)
-Discretization_Error_Norms(rL1norm, rL2norm, rLinfnorm);
+% Discretization_Error_Norms(rL1norm, rL2norm, rLinfnorm);
+[DE,rL1norm,rL2norm,rLinfnorm]=Discretization_Error_Norms(rL1norm, rL2norm, rLinfnorm);
 
 % Output solution and restart file
 write_output(n, resinit, rtime);
@@ -1373,7 +1377,7 @@ end
 end
 
 %************************************************************************
-function Discretization_Error_Norms(rL1norm, rL2norm, rLinfnorm)
+function [DE,rL1norm,rL2norm,rLinfnorm]=Discretization_Error_Norms(rL1norm, rL2norm, rLinfnorm)
 %
 %Uses global variable(s): zero
 %Uses global variable(s): imax, jmax, neq, imms, xmax, xmin, ymax, ymin, rlength
@@ -1413,6 +1417,12 @@ end
 % Test to add this back or just call the global array ummsArray
 %% look into why L1norm is giving negative values
 N=imax*jmax;
+DE=zeros(imax,jmax,neq);
+
+for k=1:neq
+DE(:,:,k)=u(:,:,k)-ummsArray_2(:,:,k);
+end
+
 rL1norm = [sum(u(:,:,1)-ummsArray_2(:,:,1),'all')/N;sum(u(:,:,2)-ummsArray_2(:,:,2),'all')/N;...
     sum(u(:,:,3)-ummsArray_2(:,:,3),'all')/N];
 
