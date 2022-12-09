@@ -12,7 +12,7 @@ global fp2 % For output of field data (solution)
 
 global imax jmax neq nmax
 global zero tenth sixth fifth fourth third half one two three four six
-global iterout imp_mat imms isgs irstr ipgorder lim cfl Cx Cy toler rkappa Re pinf uinf rho rhoinv xmin xmax ymin ymax Cx2 Cy2 fsmall
+global iterout imms isgs irstr ipgorder lim cfl Cx Cy toler rkappa Re pinf uinf rho rhoinv xmin xmax ymin ymax Cx2 Cy2 fsmall
 global rlength rmu vel2ref dx dy rpi phi0 phix phiy phixy apx apy apxy fsinx fsiny fsinxy
 
 %**Use these variables cautiously as these are globally accessible from all functions.**
@@ -234,13 +234,12 @@ rhist_var=50; %var for how often reshist is stored
 isConverged = 0;
 
 %% For continuing 129x129 case
-if imp_mat==1
 load('129x129_LDC_SGS_CFL_09@1514421.mat')
 ninit=n;rhist_var=50;
-nmax=500000;nmax=n+(nmax);                                                 % resets nmax, and changes it to be current n + 500000 itt
-artmax=1+ceil(nmax/rhist_var);                                             % resizes history vecotors
+nmax=500000;nmax=n+(nmax);
+artmax=1+ceil(nmax/rhist_var);
 nvec(end+1:artmax)=0;resvec(end+1:artmax,:)=0;convVec(end+1:artmax)=0;
-end
+
 for n = ninit:nmax
     % Calculate time step
     dtmin = compute_time_step(dtmin);
