@@ -62,12 +62,13 @@ six    = 6.0;
 
 %--------- User sets inputs here  --------
 
-nmax = 500000;        % Maximum number of iterations
+% nmax = 500000;        % Maximum number of iterations
+nmax = 1500000; 
 iterout = 5000;       % Number of time steps between solution output
 imms = 0;             % Manufactured solution flag: = 1 for manuf. sol., = 0 otherwise
 isgs = 0;             % Symmetric Gauss-Seidel  flag: = 1 for SGS, = 0 for point Jacobi
 irstr = 0;            % Restart flag: = 1 for restart (file 'restart.in', = 0 for initial run
-imp_mat = 0;          % My shit way of continuing/impoting data / restart (restart flag option failed when atempted)
+
 ipgorder = 0;         % Order of pressure gradient: 0 = 2nd, 1 = 3rd (not needed)
 lim = 1;              % variable to be used as the limiter sensor (= 1 for pressure)
 
@@ -239,10 +240,12 @@ rhist_var=50; %var for how often reshist is stored
 isConverged = 0;
 
 %% For continuing 129x129 case
+imp_mat =0;          % My shit way of continuing/impoting data / restart (restart flag option failed when atempted)
+
 if imp_mat==1
-load('257x257_LDC_SGS_CFL_002_Re1000@51324.mat')
+load('257x257_LDC_SGS_CFL_002_Re1000@51324')
 ninit=n;rhist_var=50;
-nmax=500000;nmax=n+(nmax);                                                 % resets nmax, and changes it to be current n + 500000 itt
+nmax=500000;nmax=n+(nmax*3);                                                 % resets nmax, and changes it to be current n + 500000 itt
 artmax=1+ceil(nmax/rhist_var);                                             % resizes history vecotors
 nvec(end+1:artmax)=0;resvec(end+1:artmax,:)=0;convVec(end+1:artmax)=0;
 end
@@ -312,12 +315,6 @@ for n = ninit:nmax
     set(gca, 'YScale', 'log')
     end
 
-
-
-
-
-
-
     % Check iterative convergence using L2 norms of iterative residuals
     [res, resinit, conv] = check_iterative_convergence(n, res, resinit, ninit, rtime, dtmin);
 
@@ -331,7 +328,18 @@ for n = ninit:nmax
     if( (mod(n,iterout)==0) )
         write_output(n, resinit, rtime);
     end
+     
     
+    % save .mat file every 20,000 itt
+    if ( (mod(n,20000)==0) )
+         savename=['257x257_LDC_SGS_CFL_002_Re1000@',num2str(n),'.mat'];
+         save(savename)
+    end
+
+  
+
+
+
 end  % ========== End Main Loop ==========
 %%
 hold off % REMOVE WHEN DONE TROUBLESHOOTING
@@ -348,6 +356,11 @@ end
 if isConverged == 1
     fprintf('Solution converged in %d iterations!!!', n);
 end
+
+% save .mat file at end of loop
+savename=['257x257_LDC_SGS_CFL_002_Re1000@',num2str(n),'.mat'];
+save(savename)
+
 
 
 % Calculate and Write Out Discretization Error Norms (will do this for MMS only)
