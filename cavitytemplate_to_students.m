@@ -28,12 +28,14 @@ global ummsArray; % Array of umms values (funtion umms evaluated at all nodes)
 %************ Following are fixed parameters for array sizes *************
 % Number of points in the x-direction (use odd numbers only)
 % Number of points in the y-direction (use odd numbers only)
+imax = 257;
+jmax = 257;
 % imax = 129;
 % jmax = 129;
 % imax = 65;
 % jmax = 65; 
- imax = 33; 
- jmax = 33;
+%  imax = 33; 
+%  jmax = 33;
 neq = 3;       % Number of equation to be solved ( = 3: mass, x-mtm, y-mtm)
 %********************************************
 %***** All  variables declared here. **
@@ -62,14 +64,14 @@ six    = 6.0;
 
 nmax = 500000;        % Maximum number of iterations
 iterout = 5000;       % Number of time steps between solution output
-imms = 1;             % Manufactured solution flag: = 1 for manuf. sol., = 0 otherwise
-isgs = 1;             % Symmetric Gauss-Seidel  flag: = 1 for SGS, = 0 for point Jacobi
+imms = 0;             % Manufactured solution flag: = 1 for manuf. sol., = 0 otherwise
+isgs = 0;             % Symmetric Gauss-Seidel  flag: = 1 for SGS, = 0 for point Jacobi
 irstr = 0;            % Restart flag: = 1 for restart (file 'restart.in', = 0 for initial run
 imp_mat = 0;          % My shit way of continuing/impoting data / restart (restart flag option failed when atempted)
 ipgorder = 0;         % Order of pressure gradient: 0 = 2nd, 1 = 3rd (not needed)
 lim = 1;              % variable to be used as the limiter sensor (= 1 for pressure)
 
-cfl  = 0.9;         % CFL number used to determine time step
+cfl  = 0.2;         % CFL number used to determine time step
 Cx = 0.01;     	    % Parameter for 4th order artificial viscosity in x
 Cy = 0.01;          % Parameter for 4th order artificial viscosity in y
 % Cx = 0.001;     	    
@@ -77,7 +79,7 @@ Cy = 0.01;          % Parameter for 4th order artificial viscosity in y
 
 toler = 1.e-10; 	% Tolerance for iterative residual convergence
 rkappa = 0.1;   	% Time derivative preconditioning constant
-Re = 100.0;      	% Reynolds number = rho*Uinf*L/rmu
+Re = 1000.0;      	% Reynolds number = rho*Uinf*L/rmu
 pinf = 0.801333844662; % Initial pressure (N/m^2) -> from MMS value at cavity center
 uinf = 1.0;      % Lid velocity (m/s)
 rho = 1.0;       % Density (kg/m^3)
@@ -238,7 +240,7 @@ isConverged = 0;
 
 %% For continuing 129x129 case
 if imp_mat==1
-load('129x129_LDC_SGS_CFL_09@1514421.mat')
+load('257x257_LDC_SGS_CFL_002_Re1000@51324.mat')
 ninit=n;rhist_var=50;
 nmax=500000;nmax=n+(nmax);                                                 % resets nmax, and changes it to be current n + 500000 itt
 artmax=1+ceil(nmax/rhist_var);                                             % resizes history vecotors
@@ -335,7 +337,9 @@ end  % ========== End Main Loop ==========
 hold off % REMOVE WHEN DONE TROUBLESHOOTING
 
 % resize residual and conv histories
+
 [nvec,resvec,convVec] = Rsize_res_hist(artn,nvec,resvec,convVec);
+
 
 if isConverged == 0
     fprintf('Solution failed to converge in %d iterations!!!', nmax);
@@ -348,7 +352,9 @@ end
 
 % Calculate and Write Out Discretization Error Norms (will do this for MMS only)
 % Discretization_Error_Norms(rL1norm, rL2norm, rLinfnorm);
+if imms==1
 [DE,rL1norm,rL2norm,rLinfnorm]=Discretization_Error_Norms(rL1norm, rL2norm, rLinfnorm);
+end
 
 % Output solution and restart file
 write_output(n, resinit, rtime);
