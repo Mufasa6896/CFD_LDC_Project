@@ -28,14 +28,14 @@ global ummsArray; % Array of umms values (funtion umms evaluated at all nodes)
 %************ Following are fixed parameters for array sizes *************
 % Number of points in the x-direction (use odd numbers only)
 % Number of points in the y-direction (use odd numbers only)
-imax = 257;
-jmax = 257;
+% imax = 257;
+% jmax = 257;
 % imax = 129;
 % jmax = 129;
 % imax = 65;
 % jmax = 65; 
-%  imax = 33; 
-%  jmax = 33;
+ imax = 33; 
+ jmax = 33;
 neq = 3;       % Number of equation to be solved ( = 3: mass, x-mtm, y-mtm)
 %********************************************
 %***** All  variables declared here. **
@@ -65,14 +65,14 @@ six    = 6.0;
 % nmax = 500000;        % Maximum number of iterations
 nmax = 1500000; 
 iterout = 5000;       % Number of time steps between solution output
-imms = 0;             % Manufactured solution flag: = 1 for manuf. sol., = 0 otherwise
-isgs = 0;             % Symmetric Gauss-Seidel  flag: = 1 for SGS, = 0 for point Jacobi
+imms = 1;             % Manufactured solution flag: = 1 for manuf. sol., = 0 otherwise
+isgs = 1;             % Symmetric Gauss-Seidel  flag: = 1 for SGS, = 0 for point Jacobi
 irstr = 0;            % Restart flag: = 1 for restart (file 'restart.in', = 0 for initial run
 
 ipgorder = 0;         % Order of pressure gradient: 0 = 2nd, 1 = 3rd (not needed)
 lim = 1;              % variable to be used as the limiter sensor (= 1 for pressure)
 
-cfl  = 0.2;         % CFL number used to determine time step
+cfl  = 0.9;         % CFL number used to determine time step
 Cx = 0.01;     	    % Parameter for 4th order artificial viscosity in x
 Cy = 0.01;          % Parameter for 4th order artificial viscosity in y
 % Cx = 0.001;     	    
@@ -80,7 +80,7 @@ Cy = 0.01;          % Parameter for 4th order artificial viscosity in y
 
 toler = 1.e-10; 	% Tolerance for iterative residual convergence
 rkappa = 0.1;   	% Time derivative preconditioning constant
-Re = 1000.0;      	% Reynolds number = rho*Uinf*L/rmu
+Re = 100.0;      	% Reynolds number = rho*Uinf*L/rmu
 pinf = 0.801333844662; % Initial pressure (N/m^2) -> from MMS value at cavity center
 uinf = 1.0;      % Lid velocity (m/s)
 rho = 1.0;       % Density (kg/m^3)
@@ -1068,9 +1068,7 @@ for j=2:jmax-1
                         d4pdy4 = (u(i,j+2,3)-four*u(i,j+1,3)+six*u(i,j,3)-four*u(i,j-1,3)...
             +u(i,j-2,3))/(dy^4); 
                         end                  
-                    end
-
-                    if i==imax-1 
+                    elseif i==imax-1 
                         if j==2                                            % bottom right corner
                         d4pdx4 = (three*u(i,j,3)-frtn*u(i-1,j,3)+twntsx*u(i-2,j,3)...
                 -twntfr*u(i-3,j,3)+elevn*u(i-4,j,3)-two*u(i-5,j,3))/(dx^4);
@@ -1087,18 +1085,19 @@ for j=2:jmax-1
                             d4pdy4 = (u(i,j+2,3)-four*u(i,j+1,3)+six*u(i,j,3)-four*u(i,j-1,3)...
             +u(i,j-2,3))/(dy^4); 
                         end
-                    end
-                    if j==2          % bottom wall                         % must be bottom or top wall now
+                    else
+                        if j==2          % bottom wall                         % must be bottom or top wall now
                         d4pdx4 = (u(i+2,j,3)-four*u(i+1,j,3)+six*u(i,j,3)-four*u(i-1,j,3)...
             +u(i-2,j,3))/(dx^4);
                         d4pdy4 = (three*u(i,j,3)-frtn*u(i,j+1,3)+twntsx*u(i,j+2,3)...
                 -twntfr*u(i,j+3,3)+elevn*u(i,j+4,3)-two*u(i,j+5,3))/(dy^4);
-                    end
-                    if j==jmax-1    % top wall
+                        end
+                        if j==jmax-1    % top wall
                         d4pdx4 = (u(i+2,j,3)-four*u(i+1,j,3)+six*u(i,j,3)-four*u(i-1,j,3)...
             +u(i-2,j,3))/(dx^4);
                         d4pdy4 = (three*u(i,j,3)-frtn*u(i,j-1,3)+twntsx*u(i,j-2,3)...
                 -twntfr*u(i,j-3,3)+elevn*u(i,j-4,3)-two*u(i,j-5,3))/(dy^4);
+                        end
                     end
         else
                                                                             % interior points
