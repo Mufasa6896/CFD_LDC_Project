@@ -50,7 +50,7 @@ hold on
 yticks(axtix_y)
 xlabel('x(m)')
 ylabel('y(m)')
-title(['v vel (m/s) ',num2str(imax),'x',num2str(jmax),' grid'])
+title('v vel (m/s)')
 axis equal
 hold off
 
@@ -62,7 +62,7 @@ hold on
 yticks(axtix_y)
 xlabel('x(m)')
 ylabel('y(m)')
-title(['Pressure (Pa) ',num2str(imax),'x',num2str(jmax),' grid'])
+title(['Pressure (Pa)',num2str(imax),'x',num2str(jmax),' grid'])
 axis equal
 hold off
 
@@ -77,7 +77,7 @@ set(SLU,'Color','k')
 yticks(axtix_y)
 xlabel('x(m)')
 ylabel('y(m)')
-title(['u vel (m/s) with streamlines ',num2str(imax),'x',num2str(jmax),' grid'])
+title('u vel (m/s) with streamlines')
 axis equal
 hold off
 
@@ -90,7 +90,7 @@ xticks(axtix_x)
 colorbar
 xlabel('x(m)')
 ylabel('y(m)')
-title(['u vel (m/s) raw ',num2str(imax),'x',num2str(jmax),' grid'])
+title('u vel (m/s) raw')
 shading interp
 colormap(turbo(512))
 
@@ -102,7 +102,7 @@ xticks(axtix_x)
 colorbar
 xlabel('x(m)')
 ylabel('y(m)')
-title(['v vel (m/s) raw ',num2str(imax),'x',num2str(jmax),' grid'])
+title('v vel (m/s) raw')
 shading interp
 colormap(turbo(512))
 
@@ -114,7 +114,7 @@ xticks(axtix_x)
 colorbar
 xlabel('x(m)')
 ylabel('y(m)')
-title(['Pressure (Pa) raw ',num2str(imax),'x',num2str(jmax),' grid'])
+title('Pressure (Pa) raw')
 shading interp
 colormap(turbo(512))
 

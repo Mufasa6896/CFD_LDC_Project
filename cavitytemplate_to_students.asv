@@ -1075,20 +1075,31 @@ for j=2:jmax-1
             +u(i,j-2,3))/(dy^4); 
                         end
                     end
-                    if j==2          % bottom wall                         % must be bottom or top wall now
+                    if j==2          %top wall                              % must be bottom or top wall now
                         d4pdx4 = (u(i+2,j,3)-four*u(i+1,j,3)+six*u(i,j,3)-four*u(i-1,j,3)...
             +u(i-2,j,3))/(dx^4);
                         d4pdy4 = (three*u(i,j,3)-frtn*u(i,j+1,3)+twntsx*u(i,j+2,3)...
                 -twntfr*u(i,j+3,3)+elevn*u(i,j+4,3)-two*u(i,j+5,3))/(dy^4);
                     end
-                    if j==jmax-1    % top wall
+                    if j==jmax-1
                         d4pdx4 = (u(i+2,j,3)-four*u(i+1,j,3)+six*u(i,j,3)-four*u(i-1,j,3)...
             +u(i-2,j,3))/(dx^4);
                         d4pdy4 = (three*u(i,j,3)-frtn*u(i,j-1,3)+twntsx*u(i,j-2,3)...
                 -twntfr*u(i,j-3,3)+elevn*u(i,j-4,3)-two*u(i,j-5,3))/(dy^4);
+
+                            
+
                     end
-        else
-                                                                            % interior points
+                                         % 4th derivative of pressure w.r.t. x
+                    end
+                    if j==2                                                % bottom wall
+                        d4pdy4 = (three*u(i,j,3)-frtn*u(i,j+1,3)+twntsx*u(i,j+2,3)...
+                -twntfr*u(i,j+3,3)+elevn*u(i,j+4,3)-two*u(i,j+5,3))/(dy^4);
+                    elseif j==jmax-1                                       % top wall
+                        d4pdy4 = (three*u(i,j,3)-frtn*u(i,j-1,3)+twntsx*u(i,j-2,3)...
+                -twntfr*u(i,j-3,3)+elevn*u(i,j-4,3)-two*u(i,j-5,3))/(dy^4);
+                    end
+        else                                                               % not a wall
             d4pdx4 = (u(i+2,j,3)-four*u(i+1,j,3)+six*u(i,j,3)-four*u(i-1,j,3)...
             +u(i-2,j,3))/(dx^4);                                           % 4th derivative of pressure w.r.t. x
         
