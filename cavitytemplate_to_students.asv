@@ -67,7 +67,11 @@ iterout = 5000;       % Number of time steps between solution output
 imms = 0;             % Manufactured solution flag: = 1 for manuf. sol., = 0 otherwise
 isgs = 0;             % Symmetric Gauss-Seidel  flag: = 1 for SGS, = 0 for point Jacobi
 irstr = 0;            % Restart flag: = 1 for restart (file 'restart.in', = 0 for initial run
+<<<<<<< HEAD
 imp_mat = 0;          % My shit way of continuing/impoting data / restart (restart flag option failed when atempted)
+=======
+
+>>>>>>> 48468eaa3c3516c4b92c41394ec9f6d4a10b8e8e
 ipgorder = 0;         % Order of pressure gradient: 0 = 2nd, 1 = 3rd (not needed)
 lim = 1;              % variable to be used as the limiter sensor (= 1 for pressure)
 
@@ -239,10 +243,19 @@ rhist_var=50; %var for how often reshist is stored
 isConverged = 0;
 
 %% For continuing 129x129 case
+<<<<<<< HEAD
 if imp_mat==1
 load('257x257_LDC_SGS_CFL_002_Re1000@51324.mat')
 ninit=n;rhist_var=50;
 nmax=500000;nmax=n+(nmax);                                                 % resets nmax, and changes it to be current n + 500000 itt
+=======
+imp_mat =1;          % My shit way of continuing/impoting data / restart (restart flag option failed when atempted)
+
+if imp_mat==1
+load('257x257_LDC_SGS_CFL_002_Re1000@51324')
+ninit=n;rhist_var=50;
+nmax=500000;nmax=n+(nmax*3);                                                 % resets nmax, and changes it to be current n + 500000 itt
+>>>>>>> 48468eaa3c3516c4b92c41394ec9f6d4a10b8e8e
 artmax=1+ceil(nmax/rhist_var);                                             % resizes history vecotors
 nvec(end+1:artmax)=0;resvec(end+1:artmax,:)=0;convVec(end+1:artmax)=0;
 end
@@ -312,12 +325,15 @@ for n = ninit:nmax
     set(gca, 'YScale', 'log')
     end
 
+<<<<<<< HEAD
 
 
 
 
 
 
+=======
+>>>>>>> 48468eaa3c3516c4b92c41394ec9f6d4a10b8e8e
     % Check iterative convergence using L2 norms of iterative residuals
     [res, resinit, conv] = check_iterative_convergence(n, res, resinit, ninit, rtime, dtmin);
 
@@ -331,7 +347,22 @@ for n = ninit:nmax
     if( (mod(n,iterout)==0) )
         write_output(n, resinit, rtime);
     end
+<<<<<<< HEAD
     
+=======
+     
+    
+    % save .mat file every 20,000 itt
+    if ( (mod(n,20000)==0) )
+         savename=['257x257_LDC_SGS_CFL_002_Re1000@',num2str(n),'.mat'];
+         save(savename)
+    end
+
+  
+
+
+
+>>>>>>> 48468eaa3c3516c4b92c41394ec9f6d4a10b8e8e
 end  % ========== End Main Loop ==========
 %%
 hold off % REMOVE WHEN DONE TROUBLESHOOTING
@@ -349,6 +380,14 @@ if isConverged == 1
     fprintf('Solution converged in %d iterations!!!', n);
 end
 
+<<<<<<< HEAD
+=======
+% save .mat file at end of loop
+savename=['257x257_LDC_SGS_CFL_002_Re1000@',num2str(n),'.mat'];
+save(savename)
+
+
+>>>>>>> 48468eaa3c3516c4b92c41394ec9f6d4a10b8e8e
 
 % Calculate and Write Out Discretization Error Norms (will do this for MMS only)
 % Discretization_Error_Norms(rL1norm, rL2norm, rLinfnorm);
@@ -1038,6 +1077,7 @@ for j=2:jmax-1
         
         % wall conditions using forward/backward difference for pressure (2nd order 4th derivitive) 
         if i==2||i==imax-1||j==2||j==jmax-1
+<<<<<<< HEAD
                     if i==2
                         if j==2                                            % bottom left corner
                         d4pdx4 = (three*u(i,j,3)-frtn*u(i+1,j,3)+twntsx*u(i+2,j,3)...
@@ -1090,6 +1130,14 @@ for j=2:jmax-1
                             
 
                     end
+=======
+                    if i==2                                                % left wall 
+                        d4pdx4 = (three*u(i,j,3)-frtn*u(i+1,j,3)+twntsx*u(i+2,j,3)...
+                -twntfr*u(i+3,j,3)+elevn*u(i+4,j,3)-two*u(i+5,j,3))/(dx^4);
+                    elseif i==imax-1                                       % right wall
+                        d4pdx4 = (three*u(i,j,3)-frtn*u(i-1,j,3)+twntsx*u(i-2,j,3)...
+                -twntfr*u(i-3,j,3)+elevn*u(i-4,j,3)-two*u(i-5,j,3))/(dx^4);
+>>>>>>> 48468eaa3c3516c4b92c41394ec9f6d4a10b8e8e
                                          % 4th derivative of pressure w.r.t. x
                     end
                     if j==2                                                % bottom wall
