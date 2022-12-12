@@ -358,8 +358,8 @@ if isConverged == 1
 end
 
 % save .mat file at end of loop
-savename=['257x257_LDC_SGS_CFL_002_Re1000@',num2str(n),'.mat'];
-save(savename)
+% 
+% save(savename)
 
 
 
@@ -390,6 +390,27 @@ toc  %end timer function
 %*      					All Other	Functions					      */
 %**************************************************************************/
 
+%**************************************************************************
+% Function that makes the .mat file save name
+function [savename]=SNAME(n)
+global imax jmax cfl imms Cx rkappa isgs Re
+if imms==1
+    mmsind="MMS"
+else
+    mmsind="LDC"
+end
+if isgs==1
+    sgsind="SGS"
+else
+    sgsind="PJ"
+end
+cflstr= erase(num2str(cfl),".");
+rkstr= erase(num2str(rkappa),".");
+c4str= erase(num2str(Cx),".");
+% savenamestr=[num2str(imax),'x',num2str(jmax),'_',mmsind,'_',sgsind,'_CFL_',cflstr,'_Rkap_',rkstr,'_C4_',c4str,'_Re',num2str(Re),'@',num2str(n),'.mat'];
+savenamestr=[num2str(imax),'x',num2str(jmax),'_',mmsind,'_',sgsind,'_CFL_',cflstr,'_Rkap_',rkstr,'_C4_',c4str,'_Re',num2str(Re),'@',num2str(n),'.mat'];
+savename=convertStringsToChars(savenamestr)
+end
 %**************************************************************************
 % Initalizes residual and conv history vectors
 function [nvec,artn,resvec,convVec]=res_hist_init(nmax,rhist_var)
@@ -1076,38 +1097,38 @@ for j=2:jmax-1
                         d4pdy4 = (three*u(i,j,1)-frtn*u(i,j+1,1)+twntsx*u(i,j+2,1)...
                 -twntfr*u(i,j+3,1)+elevn*u(i,j+4,1)-two*u(i,j+5,1))/(dy^4);
                         elseif j==jmax-1                                   % top right corner
-                        d4pdx4 = (three*u(i,j,3)-frtn*u(i-1,j,3)+twntsx*u(i-2,j,3)...
-                -twntfr*u(i-3,j,3)+elevn*u(i-4,j,3)-two*u(i-5,j,3))/(dx^4);
-                        d4pdy4 = (three*u(i,j,3)-frtn*u(i,j-1,3)+twntsx*u(i,j-2,3)...
-                -twntfr*u(i,j-3,3)+elevn*u(i,j-4,3)-two*u(i,j-5,3))/(dy^4);
+                        d4pdx4 = (three*u(i,j,1)-frtn*u(i-1,j,1)+twntsx*u(i-2,j,1)...
+                -twntfr*u(i-3,j,1)+elevn*u(i-4,j,1)-two*u(i-5,j,1))/(dx^4);
+                        d4pdy4 = (three*u(i,j,1)-frtn*u(i,j-1,1)+twntsx*u(i,j-2,1)...
+                -twntfr*u(i,j-3,1)+elevn*u(i,j-4,1)-two*u(i,j-5,1))/(dy^4);
                         else                                               % right wall
-                            d4pdx4 = (three*u(i,j,3)-frtn*u(i-1,j,3)+twntsx*u(i-2,j,3)...
-                -twntfr*u(i-3,j,3)+elevn*u(i-4,j,3)-two*u(i-5,j,3))/(dx^4);
-                            d4pdy4 = (u(i,j+2,3)-four*u(i,j+1,3)+six*u(i,j,3)-four*u(i,j-1,3)...
-            +u(i,j-2,3))/(dy^4); 
+                            d4pdx4 = (three*u(i,j,1)-frtn*u(i-1,j,1)+twntsx*u(i-2,j,1)...
+                -twntfr*u(i-3,j,1)+elevn*u(i-4,j,1)-two*u(i-5,j,1))/(dx^4);
+                            d4pdy4 = (u(i,j+2,1)-four*u(i,j+1,1)+six*u(i,j,1)-four*u(i,j-1,1)...
+            +u(i,j-2,1))/(dy^4); 
                         end
                     end
                     if i~=2 && i~=imax-1
                         if j==2          % bottom wall                         % must be bottom or top wall now
-                        d4pdx4 = (u(i+2,j,3)-four*u(i+1,j,3)+six*u(i,j,3)-four*u(i-1,j,3)...
-            +u(i-2,j,3))/(dx^4);
-                        d4pdy4 = (three*u(i,j,3)-frtn*u(i,j+1,3)+twntsx*u(i,j+2,3)...
-                -twntfr*u(i,j+3,3)+elevn*u(i,j+4,3)-two*u(i,j+5,3))/(dy^4);
+                        d4pdx4 = (u(i+2,j,1)-four*u(i+1,j,1)+six*u(i,j,1)-four*u(i-1,j,1)...
+            +u(i-2,j,1))/(dx^4);
+                        d4pdy4 = (three*u(i,j,1)-frtn*u(i,j+1,1)+twntsx*u(i,j+2,1)...
+                -twntfr*u(i,j+3,1)+elevn*u(i,j+4,1)-two*u(i,j+5,1))/(dy^4);
                         end
                         if j==jmax-1    % top wall
-                        d4pdx4 = (u(i+2,j,3)-four*u(i+1,j,3)+six*u(i,j,3)-four*u(i-1,j,3)...
-            +u(i-2,j,3))/(dx^4);
-                        d4pdy4 = (three*u(i,j,3)-frtn*u(i,j-1,3)+twntsx*u(i,j-2,3)...
-                -twntfr*u(i,j-3,3)+elevn*u(i,j-4,3)-two*u(i,j-5,3))/(dy^4);
+                        d4pdx4 = (u(i+2,j,1)-four*u(i+1,j,1)+six*u(i,j,1)-four*u(i-1,j,1)...
+            +u(i-2,j,1))/(dx^4);
+                        d4pdy4 = (three*u(i,j,1)-frtn*u(i,j-1,1)+twntsx*u(i,j-2,1)...
+                -twntfr*u(i,j-3,1)+elevn*u(i,j-4,1)-two*u(i,j-5,1))/(dy^4);
                         end
                     end
         else
                                                                             % interior points
-            d4pdx4 = (u(i+2,j,3)-four*u(i+1,j,3)+six*u(i,j,3)-four*u(i-1,j,3)...
-            +u(i-2,j,3))/(dx^4);                                           % 4th derivative of pressure w.r.t. x
+            d4pdx4 = (u(i+2,j,1)-four*u(i+1,j,1)+six*u(i,j,1)-four*u(i-1,j,1)...
+            +u(i-2,j,1))/(dx^4);                                           % 4th derivative of pressure w.r.t. x
         
-            d4pdy4 = (u(i,j+2,3)-four*u(i,j+1,3)+six*u(i,j,3)-four*u(i,j-1,3)...
-            +u(i,j-2,3))/(dy^4);                                           % 4th derivative of pressure w.r.t. y
+            d4pdy4 = (u(i,j+2,1)-four*u(i,j+1,1)+six*u(i,j,1)-four*u(i,j-1,1)...
+            +u(i,j-2,1))/(dy^4);                                           % 4th derivative of pressure w.r.t. y
         end
 
                                                            

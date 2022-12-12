@@ -32,10 +32,10 @@ global ummsArray; % Array of umms values (funtion umms evaluated at all nodes)
 % jmax = 257;
 % imax = 129;
 % jmax = 129;
-% imax = 65;
-% jmax = 65; 
- imax = 33; 
- jmax = 33;
+imax = 65;
+jmax = 65; 
+%  imax = 33; 
+%  jmax = 33;
 neq = 3;       % Number of equation to be solved ( = 3: mass, x-mtm, y-mtm)
 %********************************************
 %***** All  variables declared here. **
@@ -62,8 +62,8 @@ six    = 6.0;
 
 %--------- User sets inputs here  --------
 
-% nmax = 500000;        % Maximum number of iterations
-nmax = 1500000; 
+nmax = 500000;        % Maximum number of iterations
+% nmax = 1500000; 
 iterout = 5000;       % Number of time steps between solution output
 imms = 1;             % Manufactured solution flag: = 1 for manuf. sol., = 0 otherwise
 isgs = 1;             % Symmetric Gauss-Seidel  flag: = 1 for SGS, = 0 for point Jacobi
@@ -73,14 +73,14 @@ ipgorder = 0;         % Order of pressure gradient: 0 = 2nd, 1 = 3rd (not needed
 lim = 1;              % variable to be used as the limiter sensor (= 1 for pressure)
 
 cfl  = 0.9;         % CFL number used to determine time step
-Cx = 0.01;     	    % Parameter for 4th order artificial viscosity in x
-Cy = 0.01;          % Parameter for 4th order artificial viscosity in y
+Cx = 0.001;     	    % Parameter for 4th order artificial viscosity in x
+Cy = 0.001;          % Parameter for 4th order artificial viscosity in y
 % Cx = 0.001;     	    
 % Cy = 0.001;
-
 toler = 1.e-10; 	% Tolerance for iterative residual convergence
 rkappa = 0.1;   	% Time derivative preconditioning constant
 Re = 100.0;      	% Reynolds number = rho*Uinf*L/rmu
+
 pinf = 0.801333844662; % Initial pressure (N/m^2) -> from MMS value at cavity center
 uinf = 1.0;      % Lid velocity (m/s)
 rho = 1.0;       % Density (kg/m^3)
@@ -332,7 +332,7 @@ for n = ninit:nmax
     
     % save .mat file every 20,000 itt
     if ( (mod(n,20000)==0) )
-         savename=['257x257_LDC_SGS_CFL_002_Re1000@',num2str(n),'.mat'];
+        [savename]=SNAME(n);
          save(savename)
     end
 
@@ -357,10 +357,6 @@ if isConverged == 1
     fprintf('Solution converged in %d iterations!!!', n);
 end
 
-% save .mat file at end of loop
-% savename=['257x257_LDC_SGS_CFL_002_Re1000@',num2str(n),'.mat'];
-% save(savename)
-
 
 
 % Calculate and Write Out Discretization Error Norms (will do this for MMS only)
@@ -382,6 +378,10 @@ uvelMatrix = u(:,:,2);
 vvelMatrix = u(:,:,3);
 toc  %end timer function
 
+
+% save .mat file at end of loop
+[savename]=SNAME(n);
+save(savename)
 % end  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% REMEBER TO
 % UN-COMMMENT THIS AND THE FIRST LINE TO MAKE BACK INTO A FUNCTION
 % FILE!!!!!!!!
@@ -389,6 +389,26 @@ toc  %end timer function
 %**************************************************************************/
 %*      					All Other	Functions					      */
 %**************************************************************************/
+
+%**************************************************************************
+% Function that makes the .mat file save name
+function [savename]=SNAME(n)
+global imax jmax cfl imms Cx rkappa isgs Re
+if imms==1
+    mmsind='MMS';
+else
+    mmsind='LDC';
+end
+if isgs==1
+    sgsind='SGS';
+else
+    sgsind='PJ';
+end
+cflstr= erase(num2str(cfl),".");
+rkstr= erase(num2str(rkappa),".");
+c4str= erase(num2str(Cx),".");
+savename=[num2str(imax),'x',num2str(jmax),'_',mmsind,'_',sgsind,'_CFL_',cflstr,'_Rkap_',rkstr,'_C4_',c4str,'_Re',num2str(Re),'@',num2str(n),'.mat'];
+end
 
 %**************************************************************************
 % Initalizes residual and conv history vectors

@@ -4,7 +4,8 @@ close all;
 
 %% For plotting individual u/v/p results (contour plots, streamlines, raw plots)
 
-load('65x65_LDC_SGS_CFL_09@156302.mat');
+load('257x257_LDC_SGS_CFL_002_Re1000@421643.mat');
+% load('65x65_LDC_SGS_CFL_09_Rkap_01_C4_001_Re100@15496.mat')
 
 U=u(:,:,2)';
 V=u(:,:,3)';
@@ -28,6 +29,16 @@ axtix_y=(ymin:0.01:ymax);
 axtix_x=(xmin:0.01:xmax);
 
 [X,Y]=meshgrid(xx,yy);
+
+% risidual plot
+figure()
+  plot(nvec,resvec)
+  ylim([0,1])
+  xlabel('iteration')
+  ylabel('residuals')
+  legend('Continuity','x-momentum','y-momentum')
+  set(gca, 'YScale', 'log')
+
 
 % contour plots (u,v,p)
 figure()
